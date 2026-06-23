@@ -1,8 +1,18 @@
+
+import { Section, Container } from "../Components/Layout";
+import { Heading, Text } from "../Components/Typography";
+
 export default function Home() {
-return (
-<div>
-<h1 className="text-2xl font-bold">Home</h1>
-<p>Welcome to the Items application.</p>
-</div>
-)
+  return (
+    <>
+      <Section bg="bg-white">
+        <Container>
+          <Heading level={1}>Cloud Architecture Lab</Heading>
+          <Text>Start building scalable infrastructure today.</Text>
+        </Container>
+      </Section>
+
+
+    </>
+  );
 }
