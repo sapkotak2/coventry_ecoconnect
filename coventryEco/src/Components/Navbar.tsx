@@ -1,17 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Container } from './Layout';
 import { Button } from './Button';
+import { useAuthenticator } from "@aws-amplify/ui-react";
+import { fetchUserAttributes } from 'aws-amplify/auth';
 
 export const Navbar: React.FC = () => {
+  const { user, signOut } = useAuthenticator();
+  const [name, setName] = useState('');
+
+  useEffect(() => {
+    const loadAttributes = async () => {
+      if (user) {
+        const attrs = await fetchUserAttributes();
+        setName(
+          attrs.name ||
+          attrs.given_name ||
+          attrs.email ||
+          user.username
+        );
+      }
+    };
+    loadAttributes();
+  }, [user]);
+
   return (
     <>
       <nav className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-slate-100">
         <Container>
           <div className="flex justify-between items-center h-24">
+
             {/* Logo */}
             <div className="text-2xl font-black italic text-indigo-600 tracking-tighter">
-              STUDENT<span className="text-slate-900">LAB</span>
+              COVENTRY<span className="text-slate-900">ECO</span>
             </div>
 
             {/* Nav Links */}
@@ -30,15 +51,18 @@ export const Navbar: React.FC = () => {
               ))}
             </div>
 
-            {/* CTA Group */}
+            {/* Auth Group */}
             <div className="flex items-center gap-6">
-              <button className="hidden sm:block text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors">
-                Sign In
-              </button>
-              <Button variant="info" className="!rounded-full !py-2 !px-6 text-sm">
-                Enroll Now
-              </Button>
+              {user ? (
+                <>
+                  <span className="text-sm text-slate-600">Hi {name}</span>
+                  <Button variant='info' onClick={signOut}>Sign out</Button>
+                </>
+              ) : (
+                <span className="text-sm text-slate-500">Sign in or register to see more</span>
+              )}
             </div>
+
           </div>
         </Container>
       </nav>
