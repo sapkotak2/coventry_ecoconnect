@@ -5,6 +5,7 @@ import ReviewService from "../services/reviewService";
 import type { Business } from "../types/Business";
 import type { Review } from "../types/Review";
 
+// business with review count and average rating
 type BusinessStats = {
   business: Business;
   count: number;
@@ -19,15 +20,18 @@ export default function Reviews() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // load all businesses and their reviews on mount
   useEffect(() => {
     const load = async () => {
       try {
+        // get all businesses
         const businessRes = await BusinessService.getAll();
         const businesses = businessRes.data;
 
         const statList: BusinessStats[] = [];
         const allReviews: ReviewWithName[] = [];
 
+        // for each business get its reviews and calculate average
         await Promise.all(
           businesses.map(async business => {
             try {
@@ -40,6 +44,7 @@ export default function Reviews() {
 
               statList.push({ business, count, average });
 
+            
               reviews.forEach(r =>
                 allReviews.push({ ...r, businessName: business.businessName })
               );
@@ -49,6 +54,7 @@ export default function Reviews() {
           })
         );
 
+        // sort reviews newest first
         allReviews.sort(
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
@@ -65,12 +71,13 @@ export default function Reviews() {
     load();
   }, []);
 
+
   const renderStars = (value: number) =>
     Array.from({ length: 5 }, (_, i) => (
       <span key={i} className={i < Math.round(value) ? "text-yellow-400" : "text-gray-300"}>★</span>
     ));
 
-  // Initials for the avatar circle, taken from the email
+  // get initials from email
   const initials = (email: string) => {
     if (!email) return "?";
     const name = email.split("@")[0];
@@ -80,10 +87,11 @@ export default function Reviews() {
   if (loading) return <div className="bg-stone-50 min-h-screen p-10 text-gray-500">Loading reviews...</div>;
   if (error) return <div className="bg-stone-50 min-h-screen p-10 text-red-500">{error}</div>;
 
+  // sort by most and least reviewed
   const mostReviewed = [...stats].sort((a, b) => b.count - a.count).slice(0, 3);
   const leastReviewed = [...stats].sort((a, b) => a.count - b.count).slice(0, 3);
 
-  // Card used for both "Most reviewed" and "Needs more reviews"
+  // each business stat
   const StatCard = ({ s }: { s: BusinessStats }) => (
     <div className="bg-white rounded-2xl shadow-sm p-5 flex flex-col">
       <div className="flex items-start justify-between">
@@ -112,7 +120,7 @@ export default function Reviews() {
     <div className="bg-stone-50 min-h-screen">
       <div className="max-w-5xl mx-auto px-6 py-12">
 
-        {/* Heading */}
+        {/* page heading */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">Community Reviews</h1>
           <p className="text-gray-600 mt-2 max-w-md mx-auto">
@@ -120,7 +128,7 @@ export default function Reviews() {
           </p>
         </div>
 
-        {/* Most reviewed */}
+        {/* most reviewed section */}
         <section className="mb-14">
           <h2 className="text-center text-lg md:text-xl font-bold flex items-center justify-center gap-2 mb-6">
             Most reviewed places
@@ -130,10 +138,10 @@ export default function Reviews() {
           </div>
         </section>
 
-        {/* Needs more reviews */}
+        {/* least reviewed section */}
         <section className="mb-14">
           <h2 className="text-center text-lg md:text-xl font-bold flex items-center justify-center gap-2 mb-2">
-           Needs more reviews
+            Needs more reviews
           </h2>
           <p className="text-center text-sm text-gray-500 mb-6">
             These places have the fewest reviews be the first to share your experience.
@@ -143,10 +151,10 @@ export default function Reviews() {
           </div>
         </section>
 
-        {/* Latest reviews feed */}
+        {/* latest reviews  */}
         <section>
           <h2 className="text-center text-lg md:text-xl font-bold flex items-center justify-center gap-2 mb-6">
-           Latest reviews
+            Latest reviews
           </h2>
 
           {latest.length === 0 ? (
@@ -160,12 +168,13 @@ export default function Reviews() {
                   className="block bg-white rounded-2xl shadow-sm p-5 hover:shadow-md transition"
                 >
                   <div className="flex items-start gap-4">
-                    {/* Avatar circle with initials */}
+                    
                     <div className="w-10 h-10 rounded-full bg-green-100 text-green-700 font-semibold flex items-center justify-center flex-shrink-0">
                       {initials(review.userEmail)}
                     </div>
 
                     <div className="flex-1 min-w-0">
+                      {/* business name and date */}
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-gray-900">{review.businessName}</span>
                         <span className="text-xs text-gray-400 italic whitespace-nowrap">
@@ -173,10 +182,13 @@ export default function Reviews() {
                         </span>
                       </div>
 
+                      {/* stars */}
                       <div className="text-sm mt-0.5">{renderStars(review.rating)}</div>
 
+                      {/* comment */}
                       <p className="text-gray-700 text-sm mt-2">"{review.comment}"</p>
 
+                      {/* author */}
                       <span className="text-xs text-gray-500 mt-2 block">
                         {review.userEmail.split("@")[0]}
                       </span>

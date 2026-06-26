@@ -4,6 +4,7 @@ import BusinessService from "../services/businessServices";
 import ReviewService from "../services/reviewService";
 import type { Business } from "../types/Business";
 
+// live rating info for each business
 type RatingInfo = { average: number; count: number };
 
 export default function Businesses() {
@@ -13,12 +14,14 @@ export default function Businesses() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // load businesses and reviews on mount
   useEffect(() => {
     BusinessService.getAll()
       .then(async response => {
         const list = response.data;
         setBusinesses(list);
 
+        // for each business get reviews and calculate average
         const ratingMap: Record<string, RatingInfo> = {};
         await Promise.all(
           list.map(async business => {
@@ -49,15 +52,16 @@ export default function Businesses() {
       });
   }, []);
 
+
   const renderStars = (value: number) =>
     Array.from({ length: 5 }, (_, i) => (
       <span key={i} className={i < Math.round(value) ? "text-yellow-400" : "text-gray-300"}>★</span>
     ));
 
-  // Build unique category list from the businesses
+  // unique category list from businesses
   const categories = ["All", ...Array.from(new Set(businesses.map(b => b.businessCategory)))];
 
-  // Filter the visible businesses by selected category
+  // filter by selected category
   const visible = selectedCategory === "All"
     ? businesses
     : businesses.filter(b => b.businessCategory === selectedCategory);
@@ -69,7 +73,7 @@ export default function Businesses() {
     <div className="bg-stone-50 min-h-screen">
       <div className="max-w-6xl mx-auto px-6 py-12">
 
-        {/* Header */}
+        {/* page heading */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">Eco Businesses</h1>
           <p className="text-gray-600 mt-2">
@@ -77,7 +81,7 @@ export default function Businesses() {
           </p>
         </div>
 
-        {/* Category filter pills */}
+        {/*  filter */}
         <div className="flex flex-wrap justify-center gap-2 mb-10">
           {categories.map(cat => (
             <button
@@ -94,7 +98,7 @@ export default function Businesses() {
           ))}
         </div>
 
-        {/* Cards grid */}
+        {/* business cards */}
         {visible.length === 0 ? (
           <p className="text-center text-gray-500">No businesses in this category yet.</p>
         ) : (
@@ -106,7 +110,7 @@ export default function Businesses() {
                   key={business.businessId}
                   className="bg-white rounded-2xl shadow-sm p-6 flex flex-col"
                 >
-                  {/* Header row: name + review count pill */}
+                  {/* name and review count */}
                   <div className="flex items-start justify-between">
                     <h3 className="font-bold text-gray-900">{business.businessName}</h3>
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full whitespace-nowrap">
@@ -114,18 +118,18 @@ export default function Businesses() {
                     </span>
                   </div>
 
-                  {/* Category */}
+                  {/* category */}
                   <p className="text-xs text-gray-500 mt-1">{business.businessCategory}</p>
 
-                  {/* Description */}
+                  {/* description */}
                   <p className="text-sm text-gray-600 mt-3 flex-1">
                     {business.businessDescription}
                   </p>
 
-                  {/* Address */}
+                  {/* address */}
                   <p className="text-xs text-gray-500 mt-3">{business.businessAddress}</p>
 
-                  {/* Stars and rating */}
+                  {/* live rating */}
                   <div className="flex items-center gap-2 mt-2 text-sm">
                     <span>{renderStars(rating?.average || 0)}</span>
                     <span className="text-gray-600 font-medium">
@@ -135,7 +139,7 @@ export default function Businesses() {
                     </span>
                   </div>
 
-                  {/* View details button */}
+                  {/* view details button */}
                   <Link
                     to={`/businesses/${business.businessId}`}
                     className="mt-5 bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-full text-center hover:bg-green-700 transition"

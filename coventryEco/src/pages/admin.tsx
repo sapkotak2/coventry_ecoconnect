@@ -3,6 +3,7 @@ import BusinessService from '../services/businessServices';
 import ReviewService from '../services/reviewService';
 import type { Business } from '../types/Business';
 
+// available categories
 const CATEGORIES = [
   "Zero-waste shop",
   "Repair café",
@@ -20,6 +21,7 @@ export default function BusinessAdmin() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [reviewCounts, setReviewCounts] = useState<Record<string, number>>({});
 
+  // form state
   const [current, setCurrent] = useState<Business>({
     businessId: "",
     businessName: "",
@@ -35,6 +37,7 @@ export default function BusinessAdmin() {
     fetchBusinesses();
   }, []);
 
+  // load all businesses and their review counts
   const fetchBusinesses = async () => {
     setIsLoading(true);
     setError(null);
@@ -43,7 +46,7 @@ export default function BusinessAdmin() {
       const list = response.data || [];
       setBusinesses(list);
 
-      // Fetch review counts for each business
+      // get review count for each business
       const counts: Record<string, number> = {};
       await Promise.all(
         list.map(async b => {
@@ -63,6 +66,7 @@ export default function BusinessAdmin() {
     }
   };
 
+  // update form field on change
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -70,6 +74,7 @@ export default function BusinessAdmin() {
     setCurrent(prev => ({ ...prev, [name]: value }));
   };
 
+  // check required fields before saving
   const validate = () => {
     if (!current.businessName.trim()) return "Business name is required.";
     if (!current.businessCategory) return "Please select a category.";
@@ -78,6 +83,7 @@ export default function BusinessAdmin() {
     return null;
   };
 
+  // generate next business id e.g. b011
   const generateNextID = (): string => {
     if (businesses.length === 0) return "b001";
     const maxId = businesses.reduce((max, b) => {
@@ -87,6 +93,7 @@ export default function BusinessAdmin() {
     return "b" + (maxId + 1).toString().padStart(3, "0");
   };
 
+  // save or update business
   const saveBusiness = async () => {
     const validationError = validate();
     if (validationError) {
@@ -98,6 +105,7 @@ export default function BusinessAdmin() {
     setError(null);
     try {
       let toSave = current;
+      // generate id if new business
       if (!current.businessId) {
         toSave = { ...current, businessId: generateNextID() };
       }
@@ -112,6 +120,7 @@ export default function BusinessAdmin() {
     }
   };
 
+  // delete business
   const deleteBusiness = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this business?")) return;
     setIsLoading(true);
@@ -126,11 +135,13 @@ export default function BusinessAdmin() {
     }
   };
 
+  // load business into form for editing
   const editBusiness = (b: Business) => {
     setCurrent(b);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // clear the form
   const resetForm = () => {
     setCurrent({
       businessId: "",
@@ -146,7 +157,7 @@ export default function BusinessAdmin() {
     <div className="bg-stone-50 min-h-screen">
       <div className="max-w-4xl mx-auto px-6 py-12">
 
-        {/* Heading area */}
+        {/* page heading */}
         <div className="text-center mb-8">
           <span className="inline-block text-green-700 text-xs font-semibold bg-green-50 px-3 py-1 rounded-full mb-3">
             Admin
@@ -154,7 +165,7 @@ export default function BusinessAdmin() {
           <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">Business Admin Panel</h1>
         </div>
 
-        {/* Error message */}
+        {/* error message */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3 mb-6 flex justify-between max-w-2xl mx-auto">
             <span>{error}</span>
@@ -162,12 +173,13 @@ export default function BusinessAdmin() {
           </div>
         )}
 
-        {/* Add / edit form card */}
+        {/* add or edit form */}
         <div className="bg-white rounded-2xl shadow-sm p-8 mb-12 max-w-2xl mx-auto">
           <h2 className="text-lg font-bold text-gray-900 text-center mb-6">
             {current.businessId ? "Edit Business" : "Add New Business"}
           </h2>
 
+          {/* name field */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1 text-gray-700">Business Name</label>
             <input
@@ -180,6 +192,7 @@ export default function BusinessAdmin() {
             />
           </div>
 
+          {/* category dropdown */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1 text-gray-700">Category</label>
             <select
@@ -195,6 +208,7 @@ export default function BusinessAdmin() {
             </select>
           </div>
 
+          {/* address field */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1 text-gray-700">Address</label>
             <input
@@ -207,6 +221,7 @@ export default function BusinessAdmin() {
             />
           </div>
 
+          {/* description field */}
           <div className="mb-6">
             <label className="block text-sm font-medium mb-1 text-gray-700">Description</label>
             <textarea
@@ -219,6 +234,7 @@ export default function BusinessAdmin() {
             />
           </div>
 
+          {/* save and clear buttons */}
           <div className="flex gap-3">
             <button
               onClick={saveBusiness}
@@ -236,7 +252,7 @@ export default function BusinessAdmin() {
           </div>
         </div>
 
-        {/* All Businesses heading */}
+        {/* all businesses list */}
         <h2 className="text-xl font-bold text-gray-900 text-center mb-6">All Businesses</h2>
 
         {isLoading && businesses.length === 0 ? (
@@ -250,7 +266,7 @@ export default function BusinessAdmin() {
             {businesses.map(b => (
               <div key={b.businessId} className="bg-white rounded-2xl shadow-sm p-6 flex flex-col">
 
-                {/* Name + review count */}
+                {/* name and review count */}
                 <div className="flex items-start justify-between">
                   <h3 className="font-bold text-gray-900">{b.businessName}</h3>
                   <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full whitespace-nowrap">
@@ -258,13 +274,16 @@ export default function BusinessAdmin() {
                   </span>
                 </div>
 
+                {/* category */}
                 <p className="text-xs text-gray-500 mt-1">{b.businessCategory}</p>
 
+                {/* description */}
                 <p className="text-sm text-gray-600 mt-3 flex-1">{b.businessDescription}</p>
 
-                <p className="text-xs text-gray-500 mt-3"> {b.businessAddress}</p>
+                {/* address */}
+                <p className="text-xs text-gray-500 mt-3">{b.businessAddress}</p>
 
-                {/* Action buttons */}
+                {/* edit and delete buttons */}
                 <div className="flex gap-2 mt-4">
                   <button
                     onClick={() => editBusiness(b)}

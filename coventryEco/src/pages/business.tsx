@@ -18,6 +18,7 @@ export default function Business() {
   const [comment, setComment] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  // load business on mount
   useEffect(() => {
     if (!id) return;
     BusinessService.get(id)
@@ -25,12 +26,14 @@ export default function Business() {
       .catch(err => { console.error(err); setError("Business not found."); setLoading(false); });
   }, [id]);
 
+  // get logged in user email
   useEffect(() => {
     fetchUserAttributes()
       .then(attrs => setMyEmail(attrs.email || ""))
       .catch(() => setMyEmail(""));
   }, []);
 
+  // load reviews for this business
   const loadReviews = () => {
     if (!id) return;
     ReviewService.getByBusiness(id)
@@ -39,11 +42,13 @@ export default function Business() {
   };
   useEffect(() => { loadReviews(); }, [id]);
 
+  // calculate live average rating
   const averageRating =
     reviews.length > 0
       ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
       : 0;
 
+  // submit or update a review
   const handleSubmit = async () => {
     if (rating === 0 || comment.trim() === "") {
       alert("Please choose a star rating and write a comment.");
@@ -51,8 +56,10 @@ export default function Business() {
     }
     try {
       if (editingId) {
+        // update existing review
         await ReviewService.update({ reviewId: editingId, rating, comment });
       } else if (id) {
+        // add new review
         await ReviewService.create({ businessId: id, rating, comment });
       }
       setRating(0); setComment(""); setEditingId(null);
@@ -63,12 +70,14 @@ export default function Business() {
     }
   };
 
+  // load review into form for editing
   const startEdit = (review: Review) => {
     setEditingId(review.reviewId);
     setRating(review.rating);
     setComment(review.comment);
   };
 
+  // delete review
   const handleDelete = async (reviewId: string) => {
     if (!confirm("Delete this review?")) return;
     try {
@@ -79,12 +88,13 @@ export default function Business() {
     }
   };
 
+  // render stars based on rating
   const renderStars = (value: number) =>
     Array.from({ length: 5 }, (_, i) => (
       <span key={i} className={i < Math.round(value) ? "text-yellow-400" : "text-gray-300"}>★</span>
     ));
 
-  // Avatar initials from email
+  // get initials from email
   const initials = (email: string) => {
     if (!email) return "?";
     return email.split("@")[0].slice(0, 2).toUpperCase();
@@ -98,15 +108,15 @@ export default function Business() {
     <div className="bg-stone-50 min-h-screen">
       <div className="max-w-3xl mx-auto px-6 py-12">
 
-        {/* Back link */}
+        {/* back link */}
         <Link to="/businesses" className="text-green-600 hover:underline text-sm font-medium">
-          ← Back to all businesses
+          Back to all businesses
         </Link>
 
-        {/* Main business card */}
+        {/* business card */}
         <div className="mt-6 bg-white rounded-2xl shadow-sm overflow-hidden">
 
-          {/* Green header banner */}
+       
           <div className="bg-green-600 px-8 py-10 text-center">
             <span className="inline-block bg-green-500/30 text-green-100 text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full mb-4">
               {business.businessCategory}
@@ -114,6 +124,7 @@ export default function Business() {
             <h1 className="text-white text-3xl md:text-4xl font-extrabold">
               {business.businessName}
             </h1>
+            {/* live rating */}
             <div className="flex items-center justify-center gap-2 mt-3">
               <div className="text-xl">{renderStars(averageRating)}</div>
               <span className="text-green-100 text-sm font-medium">
@@ -124,7 +135,7 @@ export default function Business() {
             </div>
           </div>
 
-          {/* Body */}
+          {/* about and location */}
           <div className="px-8 py-8 space-y-6">
             <div>
               <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">About</h2>
@@ -133,23 +144,24 @@ export default function Business() {
             <hr className="border-gray-100" />
             <div>
               <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Location</h2>
-              <p className="text-gray-700"> {business.businessAddress}</p>
+              <p className="text-gray-700">{business.businessAddress}</p>
             </div>
           </div>
         </div>
 
-        {/* Reviews section */}
+        {/* reviews section */}
         <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
           <h2 className="text-xl font-bold text-gray-900 text-center mb-8">
             Reviews ({reviews.length})
           </h2>
 
-          {/* Write / edit a review */}
+          {/* write or edit review form */}
           <div className="bg-stone-50 rounded-xl p-6 mb-8">
             <p className="text-sm font-semibold text-gray-700 mb-3">
               {editingId ? "Edit your review" : "Write a review"}
             </p>
 
+            {/* star selector */}
             <div className="flex gap-1 mb-4 text-3xl">
               {[1, 2, 3, 4, 5].map(n => (
                 <button
@@ -163,6 +175,7 @@ export default function Business() {
               ))}
             </div>
 
+            {/* comment box */}
             <textarea
               value={comment}
               onChange={e => setComment(e.target.value)}
@@ -171,6 +184,7 @@ export default function Business() {
               rows={3}
             />
 
+            {/* submit or cancel */}
             <div className="flex gap-3">
               <button
                 onClick={handleSubmit}
@@ -189,7 +203,7 @@ export default function Business() {
             </div>
           </div>
 
-          {/* List of reviews */}
+          {/* review list */}
           {reviews.length === 0 ? (
             <p className="text-center text-gray-400 text-sm">No reviews yet. Be the first!</p>
           ) : (
@@ -198,12 +212,13 @@ export default function Business() {
                 <div key={review.reviewId} className="bg-stone-50 rounded-xl p-5">
                   <div className="flex items-start gap-4">
 
-                    {/* Avatar circle */}
+                    {/* avatar */}
                     <div className="w-10 h-10 rounded-full bg-green-100 text-green-700 font-semibold flex items-center justify-center flex-shrink-0">
                       {initials(review.userEmail)}
                     </div>
 
                     <div className="flex-1 min-w-0">
+                      {/* username and date */}
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-gray-900">
                           {review.userEmail.split("@")[0]}
@@ -213,11 +228,13 @@ export default function Business() {
                         </span>
                       </div>
 
+                      {/* stars */}
                       <div className="text-sm mt-0.5">{renderStars(review.rating)}</div>
 
+                      {/* comment */}
                       <p className="text-gray-700 text-sm mt-2">"{review.comment}"</p>
 
-                      {/* Edit/Delete only for the author */}
+                      {/* edit and delete only shown to author */}
                       {review.userEmail === myEmail && (
                         <div className="flex gap-4 mt-3">
                           <button
@@ -246,4 +263,4 @@ export default function Business() {
       </div>
     </div>
   );
-} 
+}
