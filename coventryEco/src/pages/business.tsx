@@ -133,7 +133,7 @@ export default function Business() {
             <hr className="border-gray-100" />
             <div>
               <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Location</h2>
-              <p className="text-gray-700">📍 {business.businessAddress}</p>
+              <p className="text-gray-700"> {business.businessAddress}</p>
             </div>
           </div>
         </div>

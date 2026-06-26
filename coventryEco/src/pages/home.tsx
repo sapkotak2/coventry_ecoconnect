@@ -162,7 +162,7 @@ export default function Home() {
                   {business.businessDescription}
                 </p>
 
-                <p className="text-xs text-gray-500 mt-3">📍 {business.businessAddress}</p>
+                <p className="text-xs text-gray-500 mt-3">{business.businessAddress}</p>
 
                 <div className="flex items-center gap-2 mt-2 text-sm">
                   <span>{renderStars(business.average)}</span>

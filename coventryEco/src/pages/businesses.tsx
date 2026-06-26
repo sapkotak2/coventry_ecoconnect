@@ -123,7 +123,7 @@ export default function Businesses() {
                   </p>
 
                   {/* Address */}
-                  <p className="text-xs text-gray-500 mt-3">📍 {business.businessAddress}</p>
+                  <p className="text-xs text-gray-500 mt-3">{business.businessAddress}</p>
 
                   {/* Stars and rating */}
                   <div className="flex items-center gap-2 mt-2 text-sm">
