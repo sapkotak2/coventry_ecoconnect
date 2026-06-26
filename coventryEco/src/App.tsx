@@ -7,6 +7,8 @@ import Footer from "./Components/Footer"
 import Home from "./pages/home"
 import Businesses from "./pages/businesses"
 import Business from "./pages/business"
+import Admin from "./pages/admin"
+import Review from "./pages/Review"
 
 
 
@@ -22,6 +24,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/businesses" element={<Businesses />} />
             <Route path="/businesses/:id" element={<Business />} />
+            <Route path="/Reviews" element={<Review />} />
+            <Route path="/admin" element={<Admin />} />
           </Routes>
           </Authenticator>
         </main>

@@ -4,5 +4,4 @@ export type Business = {
   businessDescription: string
   businessCategory: string
   businessAddress: string
-  businessRating: number
 }
