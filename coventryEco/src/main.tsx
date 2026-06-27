@@ -4,7 +4,7 @@ import './index.css'
 import App from './App.tsx'
 import { Amplify } from 'aws-amplify';
 
-// connect to AWS Cognito
+// AWS Cognito
 Amplify.configure({
   Auth: {
     Cognito: {
