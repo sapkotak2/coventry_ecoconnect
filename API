@@ -1,0 +1,155 @@
+import json
+import uuid
+import boto3
+from decimal import Decimal
+from datetime import datetime
+from boto3.dynamodb.conditions import Attr
+
+dynamodb = boto3.resource("dynamodb")
+table = dynamodb.Table("ecoDatabase")
+reviews_table = dynamodb.Table("EcoReview")
+
+def serialize_business(business):
+    return {
+        "businessId": business["businessId"],
+        "businessName": business["businessName"],
+        "businessDescription": business.get("businessDescription", ""),
+        "businessCategory": business.get("businessCategory", ""),
+        "businessAddress": business.get("businessAddress", ""),
+        "businessRating": float(business.get("businessRating", 0)),
+    }
+
+def serialize_review(review):
+    return {
+        "reviewId": review["reviewId"],
+        "businessId": review["businessId"],
+        "userEmail": review.get("userEmail", ""),
+        "rating": float(review.get("rating", 0)),
+        "comment": review.get("comment", ""),
+        "createdAt": review.get("createdAt", ""),
+    }
+
+# get user email from login token
+def get_caller_email(event):
+    try:
+        return event["requestContext"]["authorizer"]["jwt"]["claims"]["email"]
+    except (KeyError, TypeError):
+        return None
+
+def lambda_handler(event, context):
+    status_code = 200
+    headers = {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    }
+    body = {}
+
+    try:
+        route_key = event.get("routeKey")
+
+        # delete business
+        if route_key == "DELETE /businesses/{businessId}":
+            business_id = event["pathParameters"]["businessId"]
+            table.delete_item(Key={"businessId": business_id})
+            body = {"message": f"Deleted business {business_id}"}
+
+        # get one business
+        elif route_key == "GET /businesses/{businessId}":
+            business_id = event["pathParameters"]["businessId"]
+            result = table.get_item(Key={"businessId": business_id})
+            business = result.get("Item")
+            if not business:
+                status_code = 404
+                body = {"message": f"Business {business_id} not found"}
+            else:
+                body = serialize_business(business)
+
+        # get all businesses
+        elif route_key == "GET /businesses":
+            result = table.scan()
+            body = [serialize_business(b) for b in result.get("Items", [])]
+
+        # add or update business
+        elif route_key == "PUT /businesses":
+            request_json = json.loads(event.get("body") or "{}")
+            business = {
+                "businessId": request_json["businessId"],
+                "businessName": request_json["businessName"],
+                "businessDescription": request_json.get("businessDescription", ""),
+                "businessCategory": request_json.get("businessCategory", ""),
+                "businessAddress": request_json.get("businessAddress", ""),
+                "businessRating": Decimal(str(request_json.get("businessRating", 0))),
+            }
+            table.put_item(Item=business)
+            body = {"message": f"Put business {business['businessId']}"}
+
+        # get all reviews for one business
+        elif route_key == "GET /reviews/{businessId}":
+            business_id = event["pathParameters"]["businessId"]
+            result = reviews_table.scan(FilterExpression=Attr("businessId").eq(business_id))
+            body = [serialize_review(r) for r in result.get("Items", [])]
+
+        # add review
+        elif route_key == "POST /reviews":
+            request_json = json.loads(event.get("body") or "{}")
+            email = get_caller_email(event) or request_json.get("userEmail", "anonymous")
+            review = {
+                "reviewId": str(uuid.uuid4()),
+                "businessId": request_json["businessId"],
+                "userEmail": email,
+                "rating": Decimal(str(request_json.get("rating", 0))),
+                "comment": request_json.get("comment", ""),
+                "createdAt": datetime.utcnow().isoformat(),
+            }
+            reviews_table.put_item(Item=review)
+            body = serialize_review(review)
+
+        # update review
+        elif route_key == "PUT /reviews":
+            request_json = json.loads(event.get("body") or "{}")
+            review_id = request_json["reviewId"]
+            email = get_caller_email(event)
+            existing = reviews_table.get_item(Key={"reviewId": review_id}).get("Item")
+            if not existing:
+                status_code = 404
+                body = {"message": "Review not found"}
+            # block edit if not the author
+            elif email and existing.get("userEmail") != email:
+                status_code = 403
+                body = {"message": "You can only edit your own review"}
+            else:
+                existing["rating"] = Decimal(str(request_json.get("rating", existing.get("rating", 0))))
+                existing["comment"] = request_json.get("comment", existing.get("comment", ""))
+                reviews_table.put_item(Item=existing)
+                body = serialize_review(existing)
+
+        # delete review
+        elif route_key == "DELETE /reviews/{reviewId}":
+            review_id = event["pathParameters"]["reviewId"]
+            email = get_caller_email(event)
+            existing = reviews_table.get_item(Key={"reviewId": review_id}).get("Item")
+            if not existing:
+                status_code = 404
+                body = {"message": "Review not found"}
+            # block delete if not the author
+            elif email and existing.get("userEmail") != email:
+                status_code = 403
+                body = {"message": "You can only delete your own review"}
+            else:
+                reviews_table.delete_item(Key={"reviewId": review_id})
+                body = {"message": f"Deleted review {review_id}"}
+
+        else:
+            status_code = 400
+            body = {"message": f"Unsupported route: {route_key}"}
+
+    except KeyError as e:
+        status_code = 400
+        body = {"message": f"Missing required field: {str(e)}"}
+    except Exception as e:
+        status_code = 500
+        body = {"message": "Internal server error", "error": str(e)}
+
+    return {"statusCode": status_code, "headers": headers, "body": json.dumps(body)}
