@@ -14,8 +14,8 @@ import BusinessAdmin from "./pages/admin"
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: "us-east-1_2q9EqgGvC",
-      userPoolClientId: "3hq54ujmlsrbgt7sl7509fmmqa",
+      userPoolId: "us-east-1_Tl9Y95Jda",
+      userPoolClientId: "6ss73u77f81vl0t17hqhra9v6k",
     }
   }
 })
@@ -24,10 +24,11 @@ function App() {
   return (
     <Authenticator.Provider>
       <BrowserRouter>
+              <Authenticator loginMechanisms={['email']} signUpAttributes={['name']}>
         {/* show navbar on every page */}
         <Navbar />
         {/* require login before showing any page */}
-        <Authenticator loginMechanisms={['email']} signUpAttributes={['name']}>
+
           <main>
             {/* page routes */}
             <Routes>
@@ -38,11 +39,14 @@ function App() {
               <Route path="/admin" element={<BusinessAdmin />} />
             </Routes>
           </main>
-        </Authenticator>
+
         {/* show footer on every page */}
         <Footer />
+        </Authenticator>
       </BrowserRouter>
     </Authenticator.Provider>
+     
+ 
   )
 }
 

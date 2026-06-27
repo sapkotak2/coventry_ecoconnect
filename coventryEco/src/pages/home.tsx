@@ -142,7 +142,7 @@ export default function Home() {
             Top rated this month
           </h2>
           <Link to="/businesses" className="text-green-600 text-sm font-medium hover:underline">
-            View all →
+            View all
           </Link>
         </div>
 

@@ -4,15 +4,17 @@ import './index.css'
 import App from './App.tsx'
 import { Amplify } from 'aws-amplify';
 
+// connect to AWS Cognito
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: "us-east-1_2q9EqgGvC",
-      userPoolClientId: "3hq54ujmlsrbgt7sl7509fmmqa",
+      userPoolId: "us-east-1_Tl9Y95Jda",
+      userPoolClientId: "6ss73u77f81vl0t17hqhra9v6k",
     }
   }
 });
 
+// render the app
 const root = createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <StrictMode>

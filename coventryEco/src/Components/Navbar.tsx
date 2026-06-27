@@ -8,6 +8,7 @@ export const Navbar: React.FC = () => {
   const [name, setName] = useState('');
   const location = useLocation();
 
+  // load user email on login
   useEffect(() => {
     const loadAttributes = async () => {
       if (user) {
@@ -23,6 +24,7 @@ export const Navbar: React.FC = () => {
     loadAttributes();
   }, [user]);
 
+  // nav links list
   const links = [
     { label: 'Home', to: '/' },
     { label: 'Businesses', to: '/businesses' },
@@ -31,17 +33,17 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
+   
     <nav className="sticky top-0 z-50 bg-white border-b border-stone-200">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex justify-between items-center h-16">
 
+          {/* logo */}
+          <span className="text-xl font-extrabold text-gray-900">
+            Eco<span className="text-green-600">Connect</span>
+          </span>
 
-            <span className="text-xl font-extrabold text-gray-900">
-              Eco<span className="text-green-600">Connect</span>
-            </span>
-      
-
-          {/* Nav Links */}
+          {/* nav links active link */}
           <div className="hidden md:flex items-center gap-2">
             {links.map(link => {
               const isActive = location.pathname === link.to;
@@ -61,7 +63,7 @@ export const Navbar: React.FC = () => {
             })}
           </div>
 
-          {/* Auth */}
+          {/* show name and sign out if logged in */}
           <div className="flex items-center gap-4">
             {user ? (
               <>

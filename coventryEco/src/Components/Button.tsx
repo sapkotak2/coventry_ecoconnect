@@ -1,7 +1,9 @@
 import React, { type ReactNode } from 'react';
 
+// button colour options
 export type ButtonVariant = 'success' | 'info' | 'danger' | 'alert';
 
+// button props
 interface ButtonProps {
   variant?: ButtonVariant;
   children: ReactNode;
@@ -9,12 +11,13 @@ interface ButtonProps {
   className?: string;
 }
 
-export const Button: React.FC<ButtonProps> = ({ 
-  variant = "info", 
-  children, 
-  onClick, 
-  className = "" 
+export const Button: React.FC<ButtonProps> = ({
+  variant = "info",
+  children,
+  onClick,
+  className = ""
 }) => {
+  // tailwind classes for each 
   const variants: Record<ButtonVariant, string> = {
     success: "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-100 ring-emerald-500/20",
     info: "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-100 ring-indigo-500/20",
@@ -23,6 +26,7 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   return (
+    // render button with selected variant 
     <button
       onClick={onClick}
       className={`

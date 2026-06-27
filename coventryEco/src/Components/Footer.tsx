@@ -3,16 +3,16 @@ import { Link } from 'react-router-dom';
 
 export const Footer: React.FC = () => {
   return (
+    // footer wrapper
     <footer className="bg-green-900 text-green-100">
       <div className="max-w-7xl mx-auto px-6 py-16">
 
-        {/* Main grid */}
+        {/* four column grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 border-b border-green-800 pb-12">
 
-          {/* Brand */}
+          {/* brand and tagline */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              
               <span className="text-xl font-extrabold text-white">
                 Eco<span className="text-green-400">Connect</span>
               </span>
@@ -22,7 +22,7 @@ export const Footer: React.FC = () => {
             </p>
           </div>
 
-          {/* Explore */}
+          {/* explore links */}
           <div>
             <h4 className="text-white font-bold text-sm uppercase tracking-widest mb-5">Explore</h4>
             <ul className="space-y-3 text-sm">
@@ -32,7 +32,7 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Community */}
+          {/* community links */}
           <div>
             <h4 className="text-white font-bold text-sm uppercase tracking-widest mb-5">Community</h4>
             <ul className="space-y-3 text-sm">
@@ -42,7 +42,7 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Company */}
+          {/* company links */}
           <div>
             <h4 className="text-white font-bold text-sm uppercase tracking-widest mb-5">Company</h4>
             <ul className="space-y-3 text-sm">
@@ -53,7 +53,7 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom row */}
+        {/* bottom copyright row */}
         <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
           <p className="text-green-300">© {new Date().getFullYear()} EcoConnect. All rights reserved.</p>
           <div className="flex gap-8 uppercase tracking-widest font-semibold">

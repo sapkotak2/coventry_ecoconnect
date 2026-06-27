@@ -4,7 +4,7 @@ import type { Review } from '../types/Review';
 
 // api base url
 const http = axios.create({
-  baseURL: "https://cyd48csxk0.execute-api.us-east-1.amazonaws.com"
+  baseURL: "https://1l44nwu0ea.execute-api.us-east-1.amazonaws.com"
 });
 
 // get login token
